@@ -1,5 +1,4 @@
 import { app } from "./src/app.js";
+import { PORT, IS_DEV } from "./src/config/config.js";
 
-app.listen(3000, () =>
-  console.log(`Server is ready at : http://localhost:3000`),
-);
+app.listen(PORT, () => console.log(`Server is ready at PORT ${PORT}`));
