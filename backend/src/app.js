@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 
 import { clerkWebhook } from "./webhooks/clerk.webhook.js";
+import { authRouter } from "./routes/auth.route.js";
 
 export const app = express();
 
@@ -19,6 +20,7 @@ app.use(
 app.use(express.json());
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(clerkMiddleware());
+app.use("/api/auth", authRouter);
 
 const publicDir = path.join(process.cwd(), "public");
 
