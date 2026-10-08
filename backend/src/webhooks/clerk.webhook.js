@@ -96,6 +96,20 @@ clerkWebhook.post("/", async (req, res) => {
     try {
       const u = evt.data;
 
+      // Delete the user
+      if (evt.type === "user.deleted") {
+        try {
+          deleteUser(u.id, res);
+        } catch (error) {
+          console.log("Error deleting user :: ", error);
+          return res.status(500).json({
+            success: false,
+            statusCode: 500,
+            message: "Error deleting user " + error,
+          });
+        }
+      }
+
       const email =
         u.email_addresses?.find((e) => e.id === u.primary_email_address_id)
           .email_address ?? u.email_addresses[0].email_address;
@@ -116,8 +130,6 @@ clerkWebhook.post("/", async (req, res) => {
         createUser(data, res);
       } else if (evt.type === "user.updated") {
         updateUser({ ...data, updatedAt: sql`now()` }, res);
-      } else {
-        deleteUser(u.id, res);
       }
     } catch (error) {
       console.log("Error in the Clerk Webhook :: ", error);
