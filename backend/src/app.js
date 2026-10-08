@@ -8,7 +8,7 @@ import path from "path";
 
 import { clerkWebhook } from "./webhooks/clerk.webhook.js";
 import { authRouter } from "./routes/auth.route.js";
-
+import { errorHandler } from "./middlewares/errorHandler.middleware.js";
 export const app = express();
 
 app.use(
@@ -39,3 +39,6 @@ if (fs.existsSync(publicDir)) {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 }
+
+// Global error handler (must be last)
+app.use(errorHandler);

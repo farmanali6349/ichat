@@ -18,12 +18,14 @@
   "type": "module",
   "dependencies": {
     "@clerk/express": "^2.1.74",
+    "@imagekit/nodejs": "^7.12.1",
     "@neondatabase/serverless": "^1.2.0",
     "cors": "^2.8.6",
     "cron": "^4.4.0",
     "dotenv": "^18.0.5",
     "drizzle-orm": "^1.0.0-rc.4",
     "express": "^5.2.1",
+    "multer": "^2.4.0",
     "pg": "^8.23.1"
   },
   "devDependencies": {
