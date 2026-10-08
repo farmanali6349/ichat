@@ -1,7 +1,12 @@
 import { DATBASE_URL } from "../config/config.js";
 
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
-export const db = drizzle(DATBASE_URL);
+const pool = new Pool({
+  connectionString: DATBASE_URL,
+});
+
+export const db = drizzle({ client: pool });
 
 console.log("Database initiated successfully");
