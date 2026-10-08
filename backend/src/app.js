@@ -6,8 +6,15 @@ import { FRONTEND_URL } from "./config/config.js";
 import fs from "fs";
 import path from "path";
 
+import { clerkWebhook } from "./webhooks/clerk.webhook.js";
+
 export const app = express();
 
+app.use(
+  "/api/webhook/clerk",
+  express.raw({ type: "application/json" }),
+  clerkWebhook,
+);
 // MIDDLEWARES
 app.use(express.json());
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));

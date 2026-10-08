@@ -17,6 +17,7 @@ export const userTable = pgTable("user", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   clerkId: text("clerk_id").unique().notNull(),
   email: varchar("email", { length: 255 }).unique().notNull(),
+  username: varchar("username", { length: 255 }).unique().notNull(),
   fullName: varchar("full_name", { length: 100 }).notNull(),
   profilePic: text("profile_pic").default(""),
   ...timeStamps,
