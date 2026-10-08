@@ -1,0 +1,12 @@
+# Taste
+- Prefers detailed, step-by-step instructions written for a beginner; explicitly asks for "a beginner guide" with each step spelled out and background explained. Confidence: 0.65
+- Self-identifies as a beginner and wants teaching-style explanations rather than terse answers. Confidence: 0.6
+- Develops on Windows (paths like `C:\Users\...`; asks questions in a PowerShell-based workflow). Confidence: 0.75
+- Deploys with Docker (multi-stage Dockerfile) and targets AWS for hosting. Confidence: 0.6
+- Prefers a self-contained deployment on a single cloud provider — wants everything (including the database) hosted on AWS rather than split across external managed services like Neon. Confidence: 0.6
+- Ships a React (Vite) frontend + Node/Express backend, using Drizzle ORM on Neon serverless Postgres, Clerk for auth, and ImageKit for media. Confidence: 0.55
+- Keeps secrets out of git (`backend/.env`, `frontend/.env` gitignored); injects env vars at deploy time. Confidence: 0.5
+- Prefers a verify-before-deploy workflow: fix pre-deployment issues, prepare the project, and smoke-test the built artifact locally end-to-end before pushing to the cloud. Confidence: 0.65
+- Wants the agent to actively make the changes (fix code, harden config, add deploy files) rather than only explain what to do. Confidence: 0.5
+- For a first/beginner cloud deployment, prefers the simplest, most transparent, low-cost path (e.g. EC2 + Docker) over heavier managed services (ECS Fargate, App Runner, Elastic Beanstalk). Confidence: 0.5
+- Deploys to Render (PaaS) rather than self-managing cloud VMs, and expects the agent to adapt/verify the deployment plan for the chosen platform (e.g. adjusting for Render's Docker build args and PORT). Confidence: 0.55

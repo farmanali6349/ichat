@@ -11,7 +11,7 @@ export const app = express();
 // MIDDLEWARES
 app.use(express.json());
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
-app.use(clerkMiddleware);
+app.use(clerkMiddleware());
 
 const publicDir = path.join(process.cwd(), "public");
 
