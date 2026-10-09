@@ -14,13 +14,13 @@ export async function isAuthenticated(req, res, next) {
       });
     }
 
-    const res = await db
+    const response = await db
       .select()
       .from(userTable)
-      .where(eq(userId, userTable.clerkId))
+      .where(eq(userTable.clerkId, userId))
       .limit(1);
 
-    const user = Array.isArray(res) ? res[0] : res;
+    const user = Array.isArray(response) ? response[0] : response;
 
     if (!user) {
       return res.status(404).json({
