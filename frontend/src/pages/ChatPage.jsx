@@ -1,5 +1,10 @@
+import { UserButton } from "@clerk/react";
 function ChatPage() {
-  return <div>Chatpage</div>;
+  return (
+    <div>
+      <UserButton />
+    </div>
+  );
 }
 
 export default ChatPage;

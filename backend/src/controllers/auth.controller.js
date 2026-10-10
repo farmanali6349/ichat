@@ -7,10 +7,10 @@ export function checkUser(req, res) {
     });
   }
 
-  return req.status(200).json({
+  return res.status(200).json({
     success: true,
     statusCode: 200,
     message: "User data retrieved successfully",
-    user: req.user,
+    data: req.user,
   });
 }
