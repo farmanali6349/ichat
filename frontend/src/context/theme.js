@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import {
   DEFAULT_THEME_PRESET_ID,
   HERO_UI_THEME_PRESETS,
-} from "../data/herouiThemePresets";
+} from "../data/heroUiThemePresets";
 
 export const ThemeContext = createContext(null);
 
