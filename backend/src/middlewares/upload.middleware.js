@@ -25,7 +25,7 @@ export const upload = multer({
     const isImage = file.mimetype.startsWith("image/");
     const isVideo = file.mimetype.startsWith("video/");
 
-    if (!isImage || !isVideo) {
+    if (!isImage && !isVideo) {
       cb(new Error("Only Image and Video Files are allowed"));
       return;
     }

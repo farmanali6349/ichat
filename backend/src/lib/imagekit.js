@@ -10,11 +10,14 @@ function getFileName(currName = "upload") {
 
 export async function uploadChatMedia(file) {
   const fileName = getFileName(file.originalname);
-  const response = await client.uploadFile({
-    file: await toFile(file.buffer, fileName, { type: file.mimetype }),
-    fileName,
-    folder: "/chat",
-  });
-
-  return response.url;
+  try {
+    const response = await client.uploadFile({
+      file: await toFile(file.buffer, fileName, { type: file.mimetype }),
+      fileName,
+      folder: "/chat",
+    });
+    return response.url;
+  } catch (error) {
+    throw error;
+  }
 }
