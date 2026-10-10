@@ -11,7 +11,7 @@ import { authRouter } from "./routes/auth.route.js";
 import { errorHandler } from "./middlewares/errorHandler.middleware.js";
 import { messageRouter } from "./routes/message.route.js";
 
-export const app = express();
+import { app } from "./lib/socket.js";
 
 app.use(
   "/api/webhook/clerk",

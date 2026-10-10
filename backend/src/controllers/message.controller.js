@@ -2,6 +2,8 @@ import { and, desc, eq, or, sql } from "drizzle-orm";
 import { db } from "../db/db.js";
 import { messageTable, userTable } from "../db/schema.js";
 import { uploadChatMedia } from "../lib/imagekit.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
+import { io } from "../lib/socket.js";
 
 export const getAllConversations = async (req, res) => {
   const userId = req.user?.id;
@@ -172,9 +174,10 @@ export const sendMessage = async (req, res) => {
     }
 
     const reqBody = req.body;
+    const text = req.body?.text ? req.body.text.trim() : "";
     const file = req.file;
 
-    if (!reqBody.text.trim() && !file) {
+    if (!text && !file) {
       return res.status(400).json({
         success: false,
         statusCode: 400,
@@ -203,6 +206,12 @@ export const sendMessage = async (req, res) => {
       })
       .returning();
 
+    const receiverSocketId = getReceiverSocketId(receiver.id);
+
+    // Only sends message if user is online
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", message);
+    }
     return res.status(201).json({
       success: true,
       statusCode: 201,

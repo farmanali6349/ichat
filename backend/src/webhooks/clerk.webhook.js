@@ -4,69 +4,30 @@ import { CLERK_WEBHOOK_SIGNING_SECRET } from "../config/config.js";
 import { db } from "../db/db.js";
 import { eq, sql } from "drizzle-orm";
 import { userTable } from "../db/schema.js";
+
 export const clerkWebhook = express.Router();
 
-async function createUser(data, res) {
-  try {
-    let [user] = await db
-      .insert(userTable)
-      .values({ ...data })
-      .returning();
-
-    return res.status(201).json({
-      success: true,
-      statusCode: 201,
-      message: "User created successfully",
-      data: { id: user.id, clerkId: user.clerkId },
-    });
-  } catch (error) {
-    console.log("Error creating user", error);
-    return res.status(500).json({
-      success: false,
-      statusCode: 500,
-      message: "Failed creating user " + error?.message,
-    });
-  }
+async function createUser(data) {
+  const [user] = await db
+    .insert(userTable)
+    .values({ ...data })
+    .returning();
+  return user;
 }
-async function updateUser(data, res) {
-  try {
-    let [user] = await db
-      .update(userTable)
-      .set({ ...data })
-      .where(eq(data.clerkId, userTable.clerkId))
-      .returning();
 
-    return res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "User updated successfully",
-      data: { id: user.id, clerkId: user.clerkId, updatedAt: user.updatedAt },
-    });
-  } catch (error) {
-    console.log("Error updating user", error);
-    return res.status(500).json({
-      success: false,
-      statusCode: 500,
-      message: "Failed updating user " + error?.message,
-    });
-  }
+async function updateUser(data) {
+  const [user] = await db
+    .update(userTable)
+    .set({ ...data })
+    .where(eq(userTable.clerkId, data.clerkId))
+    .returning();
+
+  return user;
 }
-async function deleteUser(clerkId, res) {
-  try {
-    await db.delete(userTable).where(eq(clerkId, userTable.clerkId));
-    return res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "User deleted successfully",
-    });
-  } catch (error) {
-    console.log("Error deleting user ", error);
-    return res.status(500).json({
-      success: false,
-      statusCode: 500,
-      message: "Failed deleting user " + error?.message,
-    });
-  }
+
+async function deleteUser(clerkId) {
+  await db.delete(userTable).where(eq(userTable.clerkId, clerkId));
+  return true;
 }
 
 clerkWebhook.post("/", async (req, res) => {
@@ -86,58 +47,87 @@ clerkWebhook.post("/", async (req, res) => {
     body: payload,
   });
 
-  const evt = await verifyWebhook(request, { signingSecret });
+  let evt;
+
+  try {
+    evt = await verifyWebhook(request, { signingSecret });
+  } catch (error) {
+    console.log("Invalid Clerk webhook signature :: ", error);
+    return res.status(400).json({
+      success: false,
+      statusCode: 400,
+      message: "Invalid webhook signature",
+    });
+  }
 
   if (
-    evt.type === "user.created" ||
-    evt.type === "user.updated" ||
-    evt.type === "user.deleted"
+    evt.type !== "user.created" &&
+    evt.type !== "user.updated" &&
+    evt.type !== "user.deleted"
   ) {
-    try {
-      const u = evt.data;
+    return res.status(200).json({ success: true });
+  }
 
-      // Delete the user
-      if (evt.type === "user.deleted") {
-        try {
-          deleteUser(u.id, res);
-        } catch (error) {
-          console.log("Error deleting user :: ", error);
-          return res.status(500).json({
-            success: false,
-            statusCode: 500,
-            message: "Error deleting user " + error,
-          });
-        }
-      }
+  try {
+    const u = evt.data;
 
-      const email =
-        u.email_addresses?.find((e) => e.id === u.primary_email_address_id)
-          .email_address ?? u.email_addresses[0].email_address;
-      const fullName =
-        [u.first_name, u.last_name].filter(Boolean).join(" ") ||
-        email.split("@")[0] ||
-        "Clerk User";
-
-      const data = {
-        clerkId: u.id,
-        fullName,
-        email,
-        username: u.username,
-        profilePic: u.has_image ? u.image_url : null,
-      };
-
-      if (evt.type === "user.created") {
-        createUser(data, res);
-      } else if (evt.type === "user.updated") {
-        updateUser({ ...data, updatedAt: sql`now()` }, res);
-      }
-    } catch (error) {
-      console.log("Error in the Clerk Webhook :: ", error);
-      return res.status(400).json({
-        success: false,
-        statusCode: 500,
-        message: "Error processing webhook request " + error?.message,
+    if (evt.type === "user.deleted") {
+      await deleteUser(u.id);
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "User deleted successfully",
       });
     }
+
+    const email =
+      u.email_addresses?.find((e) => e.id === u.primary_email_address_id)
+        ?.email_address ?? u.email_addresses?.[0]?.email_address;
+
+    if (!email) {
+      throw new Error("No email found in Clerk user data");
+    }
+
+    const fullName =
+      [u.first_name, u.last_name].filter(Boolean).join(" ") ||
+      email.split("@")[0] ||
+      "Clerk User";
+
+    const data = {
+      clerkId: u.id,
+      fullName,
+      email,
+      username: u.username ?? email.split("@")[0],
+      profilePic: u.has_image ? u.image_url : null,
+    };
+
+    if (evt.type === "user.created") {
+      const user = await createUser(data);
+
+      return res.status(201).json({
+        success: true,
+        statusCode: 201,
+        message: "User created successfully",
+        data: { id: user.id, clerkId: user.clerkId },
+      });
+    }
+
+    if (evt.type === "user.updated") {
+      const user = await updateUser({ ...data, updatedAt: sql`now()` });
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: "User updated successfully",
+        data: { id: user.id, clerkId: user.clerkId, updatedAt: user.updatedAt },
+      });
+    }
+  } catch (error) {
+    console.log("Error in the Clerk Webhook :: ", error);
+    return res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: "Error processing webhook request " + error?.message,
+    });
   }
 });

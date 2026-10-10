@@ -1,8 +1,8 @@
-import { app } from "./src/app.js";
+import { httpServer } from "./src/lib/socket.js";
 import { PORT, IS_DEV } from "./src/config/config.js";
 import job from "./src/lib/cron.js";
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server is ready at PORT ${PORT}`);
 
   if (!IS_DEV) {
