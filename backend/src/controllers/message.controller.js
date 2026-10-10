@@ -3,7 +3,6 @@ import { db } from "../db/db.js";
 import { messageTable, userTable } from "../db/schema.js";
 import { uploadChatMedia } from "../lib/imagekit.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
-import { io } from "../lib/socket.js";
 
 export const getAllConversations = async (req, res) => {
   const userId = req.user?.id;
