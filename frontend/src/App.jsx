@@ -6,7 +6,11 @@ import AuthPage from "./pages/AuthPage";
 import { useAuth } from "@clerk/react";
 
 function App() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // if (isLoaded) {
+  //   return <p>Loading...</p>;
+  // }
   return (
     <ThemeProvider>
       <WallpaperProvider>
